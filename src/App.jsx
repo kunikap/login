@@ -1,7 +1,6 @@
-import { useState, useEffect,useCallback } from "react";
+import { useState, useEffect } from "react";
 import PopUp from "./components/pop-up";
 import "./App.css";
-import axios from 'axios';
 
 function App() {
   const [token, setToken] = useState(null);
@@ -10,113 +9,78 @@ function App() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
-  let data1 = { email: "eve.holt@reqres.in", password: "cityslicka" };
-  const callApi = async (url, params, isJSON = true) => {
+  useEffect(() => {
+    if (isLoggedIn) {
+      getUserList();
+    }
+  }, [isLoggedIn])
+
+  const callApi = async (url, params) => {
     try {
-      const data = await fetch(url, { ...params });
+      const data = await fetch(url, params);
       const response = await data.json();
-      return response.data;
+      console.log(response, "");
+      return response;
     } catch (err) {
-      console.error(err, "Error happened");
+      console.error(err, "Error occurred");
     }
   };
 
-  useEffect(()=> {
-    getToken();
-  }, [])
-
   const getToken = () => {
-    
-
-    // fetch(url, params).then((data) => {
-    //     return data.text();
-    //   }).then((update) => {
-    //     setToken(update.data);
-    //   }).catch(err => console.error(err));
-    //const response = await  data.json();
-    //setToken(response.data);
-    // return callApi(url, params, false)
-    //   .then((data) => {
-    //     setToken(data);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err, "--");
-    //   });
+    const params = { email: name || "eve.holt@reqres.in", password: password || "cityslicka" };
     const url = "https://reqres.in/api/login";
-
-    axios.post(url, {
-      ...data1
-    })
-    .then(function (response) {
-      console.log(response);
-    })
-    .catch(function (error) {
-      console.log(error);
-    })
-
     const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      mode: 'cors',
-      body: JSON.stringify(update),
+      body: JSON.stringify(params),
     };
-    // fetch("https://jsonplaceholder.typicode.com/posts", options)
-    //   .then((data) => {
-    //     if (!data.ok) {
-    //       throw Error(data.status);
-    //     }
-    //     return data.json();
-    //   })
-    //   .then((update) => {
-    //     console.log(update);
-    //   })
-    //   .catch((e) => {
-    //     console.log(e);
-    //   });
+    callApi(url, options)
+      .then(data => {
+        setToken(data);
+        setIsLoggedIn(true);
+      })
+      .catch((err) => console.error(err, "--"));
   };
 
-  const cb = useCallback(getToken,[])
-
   const getUserList = () => {
-    let url = "https://reqres.in/api/unknown";
-    let headers = { Authorization: token, "Content-type": "application/json" };
+    const url = "https://reqres.in/api/unknown";
+    const headers = { Authorization: token, "Content-type": "application/json" };
     const params = { headers };
 
     callApi(url, params).then((resp) => {
       setUsersList(resp.data);
-      console.log(users, "user");
     });
   };
 
-  const login = () => {
-    getToken().then(() => setIsLoggedIn(true) && getUserList());
+  const login = (event) => {
+    event.preventDefault();
+    getToken();
   };
 
   return (
     <div className="App">
       <h3>Hello there, Sign in to continue</h3>
       <div>
-        <form>
-          <div>
+        <form onSubmit={login}>
+          <div className="field">
             <label>Username/Email</label>
             <input
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
-            <div></div>
           </div>
-          <div>
+          <div className="field">
             <label>Password</label>
             <input
+              type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
-            <div></div>
           </div>
-          <button onClick={cb}>Login</button>
+          <button >Login</button>
         </form>
         <PopUp isLoggedIn={isLoggedIn} />
       </div>
