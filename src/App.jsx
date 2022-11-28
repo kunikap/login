@@ -8,16 +8,18 @@ function App() {
   const [users, setUsersList] = useState(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [showPopUp, setShowPopup] = useState(false)
 
   useEffect(() => {
     if (isLoggedIn) {
       getUserList();
-    }
-  }, [isLoggedIn])
+    } 
+  }, [isLoggedIn]);
 
   const callApi = async (url, params) => {
     try {
       const data = await fetch(url, params);
+      if (!data.ok) return Promise.reject("error");
       const response = await data.json();
       console.log(response, "");
       return response;
@@ -38,11 +40,17 @@ function App() {
     };
     callApi(url, options)
       .then(data => {
-        setToken(data);
-        setIsLoggedIn(true);
+        if (!data.error) {
+          setToken(data);
+          setIsLoggedIn(true);
+        }
+        setShowPopup(true);
       })
-      .catch((err) => console.error(err, "--"));
-  };
+      .catch((err) => {
+        setIsLoggedIn(false);
+        setShowPopup(true);
+      });
+    }
 
   const getUserList = () => {
     const url = "https://reqres.in/api/unknown";
@@ -80,9 +88,9 @@ function App() {
               onChange={(event) => setPassword(event.target.value)}
             />
           </div>
-          <button >Login</button>
+          <button className="loginbtn">Login</button>
         </form>
-        <PopUp isLoggedIn={isLoggedIn} />
+        {showPopUp && <PopUp isLoggedIn={isLoggedIn} closePopUp = {setShowPopup} />}
       </div>
     </div>
   );

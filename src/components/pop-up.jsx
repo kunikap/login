@@ -1,11 +1,24 @@
-const PopUp = ({ isLoggedIn }) => {
+import "./pop-up.css";
+
+const PopUp = ({ isLoggedIn, closePopUp }) => {
+  const handleClosePopUp = () => {
+    closePopUp(false);
+  };
+
   return (
-    <div className="notification-toast">
-      {isLoggedIn ? (
-        <p className="notification-title">Successfully Logged In</p>
-      ) : (
-        <p className="notification-message">Invalid Email or password</p>
-      )}
+    <div className="overlay">
+      <div className="wrapper">
+        <div className="close-btn-wrapper">
+          <span className="close-btn" onClick={handleClosePopUp}>
+            X
+          </span>
+        </div>
+        {isLoggedIn ? (
+          <p className="notification-title">Successfully Logged In</p>
+        ) : (
+          <p className="notification-title">Invalid Email or password</p>
+        )}
+      </div>
     </div>
   );
 };
