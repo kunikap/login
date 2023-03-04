@@ -5,15 +5,15 @@ import "./App.css";
 function App() {
   const [token, setToken] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [users, setUsersList] = useState(null);
+  const [users, setUsersList] = useState([]);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [showPopUp, setShowPopup] = useState(false)
+  const [showPopUp, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn) {
       getUserList();
-    } 
+    }
   }, [isLoggedIn]);
 
   const callApi = async (url, params) => {
@@ -29,7 +29,10 @@ function App() {
   };
 
   const getToken = () => {
-    const params = { email: name || "eve.holt@reqres.in", password: password || "cityslicka" };
+    const params = {
+      email: name || "eve.holt@reqres.in",
+      password: password || "cityslicka",
+    };
     const url = "https://reqres.in/api/login";
     const options = {
       method: "POST",
@@ -39,7 +42,7 @@ function App() {
       body: JSON.stringify(params),
     };
     callApi(url, options)
-      .then(data => {
+      .then((data) => {
         if (!data.error) {
           setToken(data);
           setIsLoggedIn(true);
@@ -50,15 +53,19 @@ function App() {
         setIsLoggedIn(false);
         setShowPopup(true);
       });
-    }
+  };
 
   const getUserList = () => {
     const url = "https://reqres.in/api/unknown";
-    const headers = { Authorization: token, "Content-type": "application/json" };
+    const headers = {
+      Authorization: token,
+      "Content-type": "application/json",
+    };
     const params = { headers };
 
     callApi(url, params).then((resp) => {
       setUsersList(resp.data);
+      console.log(users, "----");
     });
   };
 
@@ -66,6 +73,7 @@ function App() {
     event.preventDefault();
     getToken();
   };
+
 
   return (
     <div className="App">
@@ -90,7 +98,31 @@ function App() {
           </div>
           <button className="loginbtn">Login</button>
         </form>
-        {showPopUp && <PopUp isLoggedIn={isLoggedIn} closePopUp = {setShowPopup} />}
+        {showPopUp && (
+          <PopUp isLoggedIn={isLoggedIn} closePopUp={setShowPopup} />
+        )}
+        <table>
+          <thead>
+            <tr>
+              {Object.keys(users?.[0] ?? {}).map((item) => {
+                return <th>{item}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {users?.map(({ color, id, name, year, pantone_value }) => {
+              return (
+                <tr>
+                  <td>{id}</td>
+                  <td>{name}</td>
+                  <td>{year}</td>
+                  <td>{color}</td>
+                  <td>{pantone_value}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
